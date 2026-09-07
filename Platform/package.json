@@ -1,0 +1,28 @@
+{
+  "name": "subscription-video-platform",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Membership-based subscription video & live streaming platform",
+  "workspaces": [
+    "apps/*"
+  ],
+  "overrides": {
+    "vite": "6.4.3"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @platform/server",
+    "dev:web": "npm run dev --workspace @platform/web",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "test:load": "docker compose -f docker-compose.yml -f docker-compose.load.yml --profile load run --rm load",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

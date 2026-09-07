@@ -1,0 +1,32 @@
+services:
+  # Merge this override file with the base compose file to run the k6 load
+  # test against a server configured for load (rate limits lifted so the
+  # single test-client IP is not throttled):
+  #   docker compose -f docker-compose.yml -f docker-compose.load.yml --profile load run --rm load
+  # Restore the normal stack afterwards:
+  #   docker compose up -d server
+  server:
+    environment:
+      RATE_LIMIT_AUTH_MAX: 100000
+      RATE_LIMIT_WEBHOOK_MAX: 100000
+      RATE_LIMIT_CHAT_MAX: 100000
+      RATE_LIMIT_COMMENT_MAX: 100000
+      RATE_LIMIT_API_MAX: 100000
+
+  load:
+    image: grafana/k6:latest
+    restart: "no"
+    profiles: ["load"]
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      K6_BASE_URL: http://server:4000
+      K6_BROWSE_VUS: ${K6_BROWSE_VUS:-200}
+      K6_CHAT_VUS: ${K6_CHAT_VUS:-30}
+      K6_RAMP: ${K6_RAMP:-30s}
+      K6_HOLD: ${K6_HOLD:-60s}
+      K6_DRAIN: ${K6_DRAIN:-30s}
+    volumes:
+      - ./load:/load
+    command: run /load/script.js
