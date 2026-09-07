@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Board - XSS Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .message-form {
+            margin-bottom: 20px;
+        }
+        .message-form input, .message-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .message-form button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .message-form button:hover {
+            background: #45a049;
+        }
+        .messages {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .message {
+            background: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .challenge-info {
+            background: #ffffd9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Message Board</h1>
+        
+        <div class="challenge-info">
+            <h3>Challenge Information</h3>
+            <p><strong>Difficulty:</strong> Beginner</p>
+            <p><strong>Objective:</strong> Find and exploit the XSS vulnerability in this message board application.</p>
+            <p><strong>Hint:</strong> The application doesn't properly sanitize user input before displaying it.</p>
+        </div>
+        
+        <div class="message-form">
+            <h2>Post a Message</h2>
+            <form id="messageForm">
+                <div>
+                    <label for="name">Your Name:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div>
+                    <label for="message">Your Message:</label>
+                    <textarea id="message" rows="4" required></textarea>
+                </div>
+                <button type="submit">Post Message</button>
+            </form>
+        </div>
+        
+        <div class="messages">
+            <h2>Messages</h2>
+            <div id="messageList">
+                <!-- Messages will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('messageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+            
+            // Create a new message element
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            
+            // Vulnerable implementation - directly inserting user input into innerHTML
+            messageElement.innerHTML = `
+                <div class="message-header">${name} says:</div>
+                <div class="message-content">${message}</div>
+            `;
+            
+            // Add the new message to the top of the list
+            const messageList = document.getElementById('messageList');
+            messageList.insertBefore(messageElement, messageList.firstChild);
+            
+            // Clear the form
+            document.getElementById('name').value = '';
+            document.getElementById('message').value = '';
+        });
+        
+        // Add some initial messages
+        window.onload = function() {
+            const initialMessages = [
+                { name: 'Admin', message: 'Welcome to our message board! Feel free to leave a message.' },
+                { name: 'John', message: 'Hello everyone! This is a great place to chat.' },
+                { name: 'Sarah', message: 'I love this simple message board. So easy to use!' }
+            ];
+            
+            const messageList = document.getElementById('messageList');
+            
+            initialMessages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.innerHTML = `
+                    <div class="message-header">${msg.name} says:</div>
+                    <div class="message-content">${msg.message}</div>
+                `;
+                messageList.appendChild(messageElement);
+            });
+        };
+    </script>
+</body>
+</html>
